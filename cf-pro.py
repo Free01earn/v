@@ -45,7 +45,21 @@ def get_proxies():
 
 def get_cookie(url):
     global useragent, cookieJAR, cookie
-    options = webdriver.ChromeOptions()
+    try:
+        scraper = cloudscraper.create_scraper()
+        response = scraper.get(url)
+        cookie = response.cookies.get_dict()
+        if 'cf_clearance' in cookie:
+            cookieJAR = {'name': 'cf_clearance', 'value': cookie['cf_clearance']}
+            useragent = scraper.headers['User-Agent']
+            cookie = f"cf_clearance={cookie['cf_clearance']}"
+            return True
+        else:
+            print("❌ cf_clearance not found in response")
+            return False
+    except Exception as e:
+        print("❌ Error in get_cookie:", str(e))
+        return False
     arguments = [
     '--no-sandbox', '--disable-setuid-sandbox', '--disable-infobars', '--disable-logging', '--disable-login-animations',
     '--disable-notifications', '--disable-gpu', '--headless', '--lang=ko_KR', '--start-maxmized',
